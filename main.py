@@ -27,7 +27,6 @@ opt = tf.train.AdamOptimizer(learning_rate=.5).minimize(cost)
 
 init_op = tf.global_variables_initializer()
 
-
 def gen_data(size):
     data = []
     for x in range(0, size):
