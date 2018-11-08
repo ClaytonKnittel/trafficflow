@@ -4,30 +4,33 @@ import numpy as np
 inpt = tf.placeholder(tf.float32, [8], name='input')
 inpt2 = tf.reshape(inpt, [8, 1])
 
-w1 = tf.Variable(tf.random_normal([3, 8], stddev=.03), name='weight1')
+w1 = tf.Variable(tf.random_normal([3, 8], stddev=.3), name='weight1')
 
 encoding = tf.matmul(w1, inpt2)
+encoding = tf.sigmoid(encoding)
 
-w2 = tf.Variable(tf.random_normal([8, 3], stddev=.03), name='weight2')
+w2 = tf.Variable(tf.random_normal([8, 3], stddev=.3), name='weight2')
 
-res = tf.matmul(w2, encoding)
+res = tf.sigmoid(tf.matmul(w2, encoding))
 
-err = tf.reduce_mean(tf.square(tf.subtract(res, inpt)))
+inpt2 = tf.clip_by_value(inpt2, 0.001, 0.999)
+res = tf.clip_by_value(res, .001, .999)
 
-opt = tf.train.AdamOptimizer(learning_rate=.03).minimize(err)
+cross_entropy = tf.negative(tf.add(tf.multiply(inpt2, tf.log(res)), tf.multiply(tf.negative(tf.subtract(inpt2, 1)), tf.log(tf.negative(tf.subtract(res, 1))))))
+n_cross_entropy = tf.add(cross_entropy, tf.add(tf.multiply(inpt2, tf.log(inpt2)), tf.multiply(tf.negative(tf.subtract(inpt2, 1)), tf.log(tf.negative(tf.subtract(inpt2, 1))))))
+
+errvec = tf.reshape(n_cross_entropy, [-1])
+err = tf.reduce_mean(errvec)
+cost = err
+
+opt = tf.train.AdamOptimizer(learning_rate=.5).minimize(cost)
 
 init_op = tf.global_variables_initializer()
 
 
 def gen_data(size):
     data = []
-    # len = int(np.ceil(np.log2(size)))
     for x in range(0, size):
-        # put = [x]
-        # bin = []
-        # for y in range(0, len):
-        #     bin = [((x >> y) & 1)] + bin
-        # put.append(bin)
         data.append(x)
     return data
 
@@ -46,8 +49,12 @@ with tf.Session() as sess:
             inp[d] = 1
             o, e = sess.run([opt, err], feed_dict={inpt: inp})
             eavg += e
-        print(eavg / len(data))
+        # print(eavg / len(data))
 
-    i = sess.run(res, feed_dict={inpt: [0, 0, 0, 0, 0, 0, 0, 1]})
-    print(i)
+
+    for x2 in data:
+        ar = [0] * size
+        ar[x2] = 1
+        i = sess.run(res, feed_dict={inpt: ar})
+        print(ar, '\n', i, '\n')
 
