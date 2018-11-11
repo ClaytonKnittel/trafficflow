@@ -25,8 +25,6 @@ cost = err
 
 opt = tf.train.AdamOptimizer(learning_rate=.5).minimize(cost)
 
-init_op = tf.global_variables_initializer()
-
 def gen_data(size):
     data = []
     for x in range(0, size):
@@ -38,8 +36,12 @@ size = 8
 
 data = gen_data(size)
 
+#tf.reset_default_graph()
 with tf.Session() as sess:
+    init_op = tf.global_variables_initializer()
     sess.run(init_op)
+
+    # fw = tf.summary.FileWriter('./logs/traffic/train', sess.graph)
 
     for x in range(0, 100):
         eavg = 0
@@ -56,4 +58,6 @@ with tf.Session() as sess:
         ar[x2] = 1
         i = sess.run(res, feed_dict={inpt: ar})
         print(ar, '\n', i, '\n')
+
+    # fw.close()
 
