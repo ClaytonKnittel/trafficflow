@@ -1,32 +1,86 @@
-import shapefile
+from input import *
+import pygame
+from map import geomap
 
-sf1 = shapefile.Reader('/users/claytonknittel/downloads/Shape/Trans_RoadSegment.shp')
-# sf2 = shapefile.Reader('/users/claytonknittel/downloads/Shape/Trans_RoadSegment2.shp')
-# sf3 = shapefile.Reader('/users/claytonknittel/downloads/Shape/Trans_RoadSegment3.shp')
-# sf4 = shapefile.Reader('/users/claytonknittel/downloads/Shape/Trans_RoadSegment4.shp')
-# sf5 = shapefile.Reader('/users/claytonknittel/downloads/Shape/Trans_RoadSegment5.shp')
-# sf6 = shapefile.Reader('/users/claytonknittel/downloads/Shape/Trans_RoadSegment6.shp')
+g = geomap('/users/claytonknittel/downloads/Shape/Trans_RoadSegment.shp', 'rtrees/missouri')
 
-print(sf1)
-print(sf1.bbox)
-print(sf1.shape(1))
+shaps = []
 
-shap = sf1.shape(1)
+def inside(bbox1, bbox2):
+    return bbox1[2] >= bbox2[0] and bbox1[3] >= bbox2[1] and bbox1[0] <= bbox2[2] and bbox1[1] <= bbox2[3]
 
-for name in dir(shap):
-    if not name.startswith('_'):
-        print(name)
 
-print(shap.shapeTypeName)
-for point in shap.points:
-    print(['%.5f' % coord for coord in point])
+run = True
 
-fields = sf1.fields
-print(fields)
+width = 640
+height = 480
 
-# very large, takes a long time
-# records = sf1.records()
-# print(len(records))
+bb = [-90.34, 38.63, -90.3, 38.67]
 
-r1 = sf1.record(1)
-print(r1.as_dict())
+pygame.init()
+screen = pygame.display.set_mode((width, height))
+screen.convert()
+pygame.display.set_caption('Map')
+
+for shape in g.rtree.intersection(bb):
+    shaps.append(g.shapes.shape(shape))
+
+print(len(shaps))
+
+# b = [-91, 38, -89, 40]
+
+print(g.bbox)
+
+cam = camera(g.bbox, width, height)
+
+draw_bb = False
+
+def swap():
+    global draw_bb
+    draw_bb = not draw_bb
+
+def draw(draw, screen, shape):
+    pts = shape.points
+
+    if draw_bb:
+        b = shape.bbox
+        draw.line(screen, (255, 0, 0), cam.screenCoords((b[0], b[1])), cam.screenCoords((b[0], b[3])))
+        draw.line(screen, (255, 0, 0), cam.screenCoords((b[0], b[3])), cam.screenCoords((b[2], b[3])))
+        draw.line(screen, (255, 0, 0), cam.screenCoords((b[2], b[3])), cam.screenCoords((b[2], b[1])))
+        draw.line(screen, (255, 0, 0), cam.screenCoords((b[2], b[1])), cam.screenCoords((b[0], b[1])))
+
+    pt = pts[0]
+    for pt2 in pts[1:]:
+        draw.line(screen, (0, 0, 0), cam.screenCoords(pt), cam.screenCoords(pt2))
+        pt = pt2
+
+kl = keyListener()
+kl[pygame.K_w] = lambda: cam.move(dy=.07)
+kl[pygame.K_s] = lambda: cam.move(dy=-.07)
+kl[pygame.K_d] = lambda: cam.move(dx=.07)
+kl[pygame.K_a] = lambda: cam.move(dx=-.07)
+kl[pygame.K_SPACE] = lambda: swap()
+
+while run:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            run = False
+        elif event.type == pygame.KEYDOWN:
+            kl.pollEvent(event.key, True)
+        elif event.type == pygame.KEYUP:
+            kl.pollEvent(event.key, False)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if (event.button == 4):
+                cam.zoom_in(1.03)
+            elif (event.button == 5):
+                cam.zoom_in(.97)
+    kl.act()
+    screen.fill((20, 240, 250))
+
+    for s in shaps:
+        draw(pygame.draw, screen, s)
+
+    pygame.display.flip()
+
+pygame.display.quit()
+pygame.quit()
