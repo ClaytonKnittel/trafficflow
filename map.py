@@ -1,7 +1,6 @@
 import shapefile
 import os.path
 from rtree import index
-import time
 
 def _gen_file(file, num):
     if file[-4:] != '.shp' and file[-4:] != '.dbf':

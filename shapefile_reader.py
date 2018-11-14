@@ -15,7 +15,10 @@ run = True
 width = 640
 height = 480
 
-bb = [-90.34, 38.63, -90.3, 38.67]
+# bb = [-90.34, 38.63, -90.3, 38.67]
+bb = [-90.6, 38.56, -90.56, 38.6]
+
+print(g.shapes._sfiles[0].fields)
 
 pygame.init()
 screen = pygame.display.set_mode((width, height))
@@ -55,22 +58,25 @@ def draw(draw, screen, shape):
         pt = pt2
 
 kl = keyListener()
-kl[pygame.K_w] = lambda: cam.move(dy=.07)
-kl[pygame.K_s] = lambda: cam.move(dy=-.07)
-kl[pygame.K_d] = lambda: cam.move(dx=.07)
-kl[pygame.K_a] = lambda: cam.move(dx=-.07)
-kl[pygame.K_SPACE] = lambda: swap()
+kl.pressAction(pygame.K_w, lambda: cam.move(dy=.05))
+kl.pressAction(pygame.K_s, lambda: cam.move(dy=-.05))
+kl.pressAction(pygame.K_d, lambda: cam.move(dx=.05))
+kl.pressAction(pygame.K_a, lambda: cam.move(dx=-.05))
+kl.tapAction(pygame.K_SPACE, lambda: swap())
 
 while run:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         elif event.type == pygame.KEYDOWN:
-            kl.pollEvent(event.key, True)
+            kl.pollEvent(event)
         elif event.type == pygame.KEYUP:
-            kl.pollEvent(event.key, False)
+            kl.pollEvent(event)
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if (event.button == 4):
+            if event.button == 1:
+                shap = g.shapes.shapeRecord(list(g.rtree.nearest(cam.worldCoords(pygame.mouse.get_pos())))[0])
+                print(shap.record['FULL_STREE'])
+            if event.button == 4:
                 cam.zoom_in(1.03)
             elif (event.button == 5):
                 cam.zoom_in(.97)

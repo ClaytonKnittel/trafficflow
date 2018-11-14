@@ -1,4 +1,4 @@
-
+from pygame import KEYUP, KEYDOWN
 
 class camera:
 
@@ -55,20 +55,36 @@ class camera:
         return ((pos[0] - xmin) * self.__sDim[0] / (xmax - xmin),
                 self.__sDim[1] - (pos[1] - ymin) * self.__sDim[1] / (ymax - ymin))
 
+    def worldCoords(self, pos):
+        return (self.__pos[0] + self.__swid * (pos[0] / self.__sDim[0] - .5),
+                self.__pos[1] + self.__swid * self.aspectRatio() * (.5 - pos[1] / self.__sDim[1]))
+
 
 class keyListener:
+
+    RELEASED = 0
+    JUST_PRESSED = 1
+    PRESSED = 2
 
     def __init__(self):
         self.__dict = {}
 
-    def __setitem__(self, key, val):
-        self.__dict[key] = [val, False]
+    def pressAction(self, key, val):
+        self.__dict[key] = [val, keyListener.RELEASED, False]
 
-    def pollEvent(self, key, keyPress):
-        if key in self.__dict:
-            self.__dict[key][1] = keyPress
+    def tapAction(self, key, val):
+        self.__dict[key] = [val, keyListener.RELEASED, True]
+
+    def pollEvent(self, event):
+        if event.key in self.__dict:
+            if event.type == KEYUP:
+                self.__dict[event.key][1] = keyListener.RELEASED
+            elif event.type == KEYDOWN:
+                self.__dict[event.key][1] = keyListener.JUST_PRESSED
 
     def act(self):
         for pair in self.__dict.values():
-            if pair[1]:
+            if pair[1] == keyListener.JUST_PRESSED:
                 pair[0]()
+                if pair[2]:
+                    pair[1] = keyListener.PRESSED
