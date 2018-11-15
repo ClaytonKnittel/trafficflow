@@ -1,5 +1,4 @@
 import tensorflow as tf
-import numpy as np
 
 inpt = tf.placeholder(tf.float32, [8], name='input')
 inpt2 = tf.reshape(inpt, [8, 1])

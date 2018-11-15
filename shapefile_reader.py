@@ -1,8 +1,10 @@
 from input import *
 import pygame
 from map import geomap
+from accidents import *
 
-g = geomap('/users/claytonknittel/downloads/Shape/Trans_RoadSegment.shp', 'rtrees/missouri')
+g = geomap('/users/claytonknittel/downloads/Pennsylvania/Trans_RoadSegment.shp', 'rtrees/pennsylvania')
+data = data_generator('/users/claytonknittel/downloads/alleghenyAccidents.csv')
 
 shaps = []
 
@@ -16,7 +18,9 @@ width = 640
 height = 480
 
 # bb = [-90.34, 38.63, -90.3, 38.67]
-bb = [-90.6, 38.56, -90.56, 38.6]
+# bb = [-90.6, 38.56, -90.56, 38.6]
+allegheny_bbox = [-80.4866, 40.0970993, -74.94589996, 41.01869965]
+bb = [-80., 40.5, -79.8, 40.7]
 
 print(g.shapes._sfiles[0].fields)
 
@@ -83,7 +87,15 @@ while run:
     kl.act()
     screen.fill((20, 240, 250))
 
+    for a in data:
+        if not inside(a.bbox(), cam.bbox()):
+            continue
+        p = cam.screenCoords(a.pos)
+        pp = (int(p[0]), int(p[1]))
+        pygame.draw.circle(screen, (230, 40, 20), pp, 2)
     for s in shaps:
+        if not inside(s.bbox, cam.bbox()):
+            continue
         draw(pygame.draw, screen, s)
 
     pygame.display.flip()

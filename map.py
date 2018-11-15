@@ -22,6 +22,8 @@ class shapefiles:
             self._sfiles.append(shapefile.Reader(file))
             self._len += len(self._sfiles[-1])
             i += 1
+        if self._len == 0:
+            raise FileNotFoundError('No shapefile found at ' + firstFileLoc)
 
     def __del__(self):
         for file in self._sfiles:
@@ -101,7 +103,7 @@ class geomap:
 
 
 if __name__ == '__main__':
-    # r = _rtree_generator('/users/claytonknittel/downloads/Shape/Trans_RoadSegment.shp')
-    # r.load_into_file('rtrees/missouri')
-    g = geomap('/users/claytonknittel/downloads/Shape/Trans_RoadSegment.shp', 'rtrees/missouri')
+    # r = _rtree_generator('/users/claytonknittel/downloads/Shape-3/Trans_RoadSegment.shp')
+    # r.load_into_file('rtrees/pennsylvania')
+    g = geomap('rtrees/Pennsylvania/Trans_RoadSegment.shp', 'rtrees/pennsylvania')
     print([i for i in g.rtree.intersection((-90.34, 38.63, -90.3, 38.67))])

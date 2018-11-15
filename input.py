@@ -48,16 +48,20 @@ class camera:
         self._snap()
 
     def screenCoords(self, pos):
-        xmin = self.__pos[0] - self.__swid / 2
-        xmax = self.__pos[0] + self.__swid / 2
-        ymin = self.__pos[1] - self.__swid * self.aspectRatio() / 2
-        ymax = self.__pos[1] + self.__swid * self.aspectRatio() / 2
-        return ((pos[0] - xmin) * self.__sDim[0] / (xmax - xmin),
-                self.__sDim[1] - (pos[1] - ymin) * self.__sDim[1] / (ymax - ymin))
+        bbox = self.bbox()
+        return ((pos[0] - bbox[0]) * self.__sDim[0] / (bbox[2] - bbox[0]),
+                self.__sDim[1] - (pos[1] - bbox[1]) * self.__sDim[1] / (bbox[3] - bbox[1]))
 
     def worldCoords(self, pos):
         return (self.__pos[0] + self.__swid * (pos[0] / self.__sDim[0] - .5),
                 self.__pos[1] + self.__swid * self.aspectRatio() * (.5 - pos[1] / self.__sDim[1]))
+
+    def bbox(self):
+        xmin = self.__pos[0] - self.__swid / 2
+        xmax = self.__pos[0] + self.__swid / 2
+        ymin = self.__pos[1] - self.__swid * self.aspectRatio() / 2
+        ymax = self.__pos[1] + self.__swid * self.aspectRatio() / 2
+        return (xmin, ymin, xmax, ymax)
 
 
 class keyListener:
