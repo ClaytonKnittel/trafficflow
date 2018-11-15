@@ -3,7 +3,7 @@ import pygame
 from map import geomap
 from accidents import *
 
-g = geomap('/users/claytonknittel/downloads/Pennsylvania/Trans_RoadSegment.shp', 'rtrees/pennsylvania')
+g = geomap('/users/claytonknittel/downloads/Pennsylvania', 'rtrees/pennsylvania')
 data = data_generator('/users/claytonknittel/downloads/alleghenyAccidents.csv')
 
 shaps = []
@@ -20,7 +20,7 @@ height = 480
 # bb = [-90.34, 38.63, -90.3, 38.67]
 # bb = [-90.6, 38.56, -90.56, 38.6]
 allegheny_bbox = [-80.4866, 40.0970993, -74.94589996, 41.01869965]
-bb = [-80., 40.5, -79.8, 40.7]
+bb = [-80., 40.5, -79.8, 40.65]
 
 print(g.shapes._sfiles[0].fields)
 
@@ -32,13 +32,13 @@ pygame.display.set_caption('Map')
 for shape in g.rtree.intersection(bb):
     shaps.append(g.shapes.shape(shape))
 
-print(len(shaps))
+print(len(shaps), len(data))
 
 # b = [-91, 38, -89, 40]
 
 print(g.bbox)
 
-cam = camera(g.bbox, width, height)
+cam = camera(bb, width, height)
 
 draw_bb = False
 

@@ -107,7 +107,7 @@ class data_generator:
         for path in paths:
             for a in gen_accidents(path):
                 self.accs.append(_acc(a))
-        self.ratio = 9
+        self.ratio = 0
 
     def _percent_train(self):
         return self.ratio / (1 + self.ratio)
