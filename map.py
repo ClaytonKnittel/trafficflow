@@ -3,8 +3,7 @@ import os.path
 from rtree import index
 
 def _gen_file(file, num):
-    if file[-4:] != '.shp' and file[-4:] != '.dbf':
-        raise FileNotFoundError('must choose files with .shp (or .dbf) extension')
+    file += '/Trans_RoadSegment.shp'
     if num == 0:
         return file
     return file[:-4] + str(num + 1) + file[-4:]
@@ -66,6 +65,9 @@ class shapefiles:
         for shape_file in self._sfiles:
             for shape in shape_file.iterShapeRecords():
                 yield shape
+
+    def fields(self):
+        return self._sfiles[0].fields
 
 
 class _rtree_generator:

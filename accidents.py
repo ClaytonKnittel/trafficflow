@@ -149,8 +149,8 @@ class data_generator:
     # with replacement
     def bootstrap_sample(self, sample_size):
         for x in range(0, sample_size):
-            yield random.randint(0, len(self))
+            yield self.accs[random.randint(0, len(self))]
 
 
 def get_road(geomap, accident):
-    return geomap.rtree.nearest(accident.pos, 1)
+    return geomap.shapes.shapeRecord(list(geomap.rtree.nearest(accident.pos, 1))[0])
