@@ -8,6 +8,7 @@ def _gen_file(file, num):
         return file
     return file[:-4] + str(num + 1) + file[-4:]
 
+
 class shapefiles:
 
     def __init__(self, firstFileLoc):
