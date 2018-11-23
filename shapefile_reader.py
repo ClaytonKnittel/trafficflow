@@ -12,6 +12,8 @@ def inside(bbox1, bbox2):
     return bbox1[2] >= bbox2[0] and bbox1[3] >= bbox2[1] and bbox1[0] <= bbox2[2] and bbox1[1] <= bbox2[3]
 
 
+print(g.shapes.fields())
+exit(0)
 run = True
 
 width = 640

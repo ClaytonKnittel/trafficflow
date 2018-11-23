@@ -1,0 +1,88 @@
+
+Data in csv files:
+    All csv files must have the names of all of the attributes at the top,
+    even if they are not all included in the data (empty/omitted ones can
+    be left blank)
+
+    i.e. first row of csv must be
+    severity,deaths,lat,long, ... etc.
+
+
+required: all data points to be included must specify all of these attributes
+
+severity: severity of accident, based on our scale:
+    0: no injury
+    1: minor injury
+    2: medium
+    3: major injury
+    4: fatal
+deaths: number of people who died in accident in total
+injuries: number of injuries/possible injuries in accident in total
+passengers: number of people involved in total
+lat: latitude of accident location
+lon: longitude of accident location
+time: time of day occured, measured in minutes from midnight
+collision type:
+    no collision = 0
+    rear end = 1
+    head on = 2
+    rear to rear = 3
+    angle = 4
+    sideswipe in same direction = 5
+    sideswipe in opposite direction = 6
+    hit fixed object = 7
+    hid pedestrian = 8
+    other = 9
+road type:
+    US route = 0
+    interstate = 1
+    state route = 2
+    county route = 3
+    local street = 4
+year: the year the accident occured
+month: the month of the accident
+    january = 1
+    february = 2
+    march = 3
+    april = 4
+    may = 5
+    june = 6
+    july = 7
+    august = 8
+    september = 9
+    october = 10
+    november = 11
+    december = 12
+day: day of month of accident
+
+
+
+
+optional:
+
+street name: name of street on which accident occured
+speed limit: speed limit of road (mph)
+lane count: number of lanes per side
+urban/rural: whether road is urban or rural
+    0: urban
+    1: rural
+intersection type:
+    mid block = 0
+    four-way intersection = 1
+    t-intersection = 2
+    y-intersection = 3
+    roundabout = 4
+    multi-leg intersection = 5
+    on ramp = 6
+    off ramp = 7
+    crossover = 8
+    railroad crossing = 9
+    unknown/unspecified = -1
+weather:
+    clear = 0
+    cloudy = 1
+    rain = 2
+    smog = 3
+    snow = 4
+    sleet/hail = 5
+
