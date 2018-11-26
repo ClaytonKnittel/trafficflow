@@ -106,7 +106,7 @@ class geomap:
 
 
 if __name__ == '__main__':
-    # r = _rtree_generator('/users/claytonknittel/downloads/Shape-3/Trans_RoadSegment.shp')
-    # r.load_into_file('rtrees/pennsylvania')
-    g = geomap('rtrees/Pennsylvania/Trans_RoadSegment.shp', 'rtrees/pennsylvania')
+    # r = _rtree_generator('/users/claytonknittel/downloads/Shape')
+    # r.load_into_file('rtrees/north_carolina')
+    g = geomap('/users/claytonknittel/downloads/Shape', 'rtrees/north_carolina')
     print([i for i in g.rtree.intersection((-90.34, 38.63, -90.3, 38.67))])

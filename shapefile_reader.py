@@ -4,7 +4,6 @@ from map import geomap
 from accidents import *
 
 g = geomap('/users/claytonknittel/downloads/Pennsylvania', 'rtrees/pennsylvania')
-data = data_generator('/users/claytonknittel/downloads/alleghenyAccidents.csv')
 
 shaps = []
 
@@ -13,7 +12,14 @@ def inside(bbox1, bbox2):
 
 
 print(g.shapes.fields())
+
+sr = g.shapes.record(1550)
+for f in g.shapes.fields()[1:]:
+    print(f[0], sr[f[0]])
 exit(0)
+
+data = data_generator('/users/claytonknittel/downloads/alleghenyAccidents.csv')
+
 run = True
 
 width = 640
