@@ -30,7 +30,7 @@ road type:
     county route = 3
     local street = 4
     private road/driveway = 5
-    parking lot/off the road = 6
+    unknown = -1
 year: the year the accident occured
 month: the month of the accident
     january = 1
@@ -56,8 +56,10 @@ street name: name of street on which accident occured
 speed limit: speed limit of road (mph)
 lane count: number of lanes per side
 urban/rural: whether road is urban or rural
-    urban = 0
-    rural = 1
+    rural = 0
+    small_urban = 1 (pop. 0-49999)
+    urban = 2       (pop. 50000-199999)
+    large_urban = 3 (pop. 200000+)
 intersection type:
     mid block / not intersection = 0
     four-way intersection = 1
@@ -72,13 +74,13 @@ intersection type:
     unknown/unspecified = -1
 weather:
     clear = 0
-    cloudy = 1
     rain = 2
-    wet = 3
-    smog = 4
-    snow = 5
-    ice = 6
-    sleet/hail = 7
+    sleet = 3
+    snow = 4
+    fog = 5
+    rain and fog = 6
+    sleet and fog = 7
+    unknown = -1
 collision type:
     no collision = 0
     rear end = 1

@@ -37,12 +37,14 @@ class road_type:
     county_route = 3
     local_street = 4
     private = 5
-    offroad = 6
+    unknown = -1
 
 
 class urban_rural:
-    urban = 0
-    rural = 1
+    rural = 0
+    small_urban = 1
+    urban = 2
+    large_urban = 3
 
 
 class intersection_type:
@@ -61,13 +63,12 @@ class intersection_type:
 
 class weather:
     clear = 0
-    cloudy = 1
     rain = 2
-    wet = 3
-    smog = 4
-    snow = 5
-    ice = 6
-    sleet = 7
+    sleet = 3
+    snow = 4
+    fog = 5
+    rain_and_fog = 6
+    sleet_and_fog = 7
     unknown = -1
 
 
@@ -117,20 +118,20 @@ if __name__ == '__main__':
 
     with open('/users/claytonknittel/downloads/alleghenyAccidents.csv', 'r') as file:
         f = csv.DictReader(file, delimiter=',')
-        with open('/users/claytonknittel/downloads/alleg.csv', 'w') as file:
+        with open('/users/claytonknittel/PycharmProjects/trafficflow/data/allegheny.csv', 'w') as file:
             wr = csv.DictWriter(file, fieldnames=attrrow, delimiter=',')
             wr.writeheader()
             for row in f:
                 dic = {}
-                if row['MAX_SEVERITY_LEVEL'] == 0:
+                if row['MAX_SEVERITY_LEVEL'] == '0':
                     dic['severity'] = severity.no_injury
-                elif row['MAX_SEVERITY_LEVEL'] == 1:
+                elif row['MAX_SEVERITY_LEVEL'] == '1':
                     dic['severity'] = severity.fatal
-                elif row['MAX_SEVERITY_LEVEL'] == 2:
+                elif row['MAX_SEVERITY_LEVEL'] == '2':
                     dic['severity'] = severity.major_injury
-                elif row['MAX_SEVERITY_LEVEL'] == 3:
+                elif row['MAX_SEVERITY_LEVEL'] == '3':
                     dic['severity'] = severity.moderate_injury
-                elif row['MAX_SEVERITY_LEVEL'] == 4:
+                elif row['MAX_SEVERITY_LEVEL'] == '4':
                     dic['severity'] = severity.minor_injury
                 else:
                     dic['severity'] = severity.unknown
@@ -171,12 +172,19 @@ if __name__ == '__main__':
 
                 dic['year'] = row['CRASH_YEAR']
                 dic['month'] = row['CRASH_MONTH']
-                dic['day'] = row['']
-                if row['TIME_OF_DAY'] == '9999':
+                # dic['day'] = row['']
+                if row['TIME_OF_DAY'] == '9999' or len(row['TIME_OF_DAY']) < 3:
                     dic['time'] = -1
                 else:
-                    dt = datetime.strptime(row['TIME_OF_DAY'], '%-H%M')
+                    t = row['TIME_OF_DAY']
+                    if len(t) == 3:
+                        t = '0' + t
+                    dt = datetime.strptime(t, '%H%M')
                     dic['time'] = dt.hour * 60 + dt.minute
+
+                dic['lane count'] = row['LANE_COUNT']
+                dic['speed limit'] = row['SPEED_LIMIT']
+                dic['urban/rural'] = row['URBAN_RURAL']
 
                 int_type = int(row['INTERSECT_TYPE'])
                 if int_type == 0:
@@ -185,50 +193,48 @@ if __name__ == '__main__':
                     dic['intersection type'] = intersection_type.four_way_intersection
                 elif int_type == 2:
                     dic['intersection type'] = intersection_type.t_intersection
-                elif int_type == 'FOUR-WAY INTERSECTION':
-                    dic['intersection type'] = intersection_type.four_way_intersection
-                elif int_type == 'DRIVEWAY/ PUBLIC' or int_type == 'DRIVEWAY/ PRIVATE':
-                    dic['intersection type'] = intersection_type.mid_block
-                elif int_type == 'Y-INTERSECTION':
+                elif int_type == 3:
                     dic['intersection type'] = intersection_type.y_intersection
-                elif int_type == 'OFF-RAMP PROPER' or int_type == 'OFF-RAMP TERMINAL ON CROSSROAD' or int_type == 'OFF-RAMP ENTRY':
-                    dic['intersection type'] = intersection_type.off_ramp
-                elif int_type == 'OTHER *' or int_type == '':
-                    dic['intersection type'] = intersection_type.unknown
-                elif int_type == 'ON-RAMP ENTRY' or int_type == 'ON-RAMP TERMINAL ON CROSSROAD' or int_type == 'ON-RAMP PROPER':
-                    dic['intersection type'] = intersection_type.on_ramp
-                elif int_type == 'RAILROAD CROSSING':
-                    dic['intersection type'] = intersection_type.railroad_crossing
-                elif int_type == 'BRIDGE APPROACH' or int_type == 'BRIDGE' or int_type == 'UNDERPASS':
-                    dic['intersection type'] = intersection_type.mid_block
-                elif int_type == 'TRAFFIC CIRCLE/ROUNDABOUT':
+                elif int_type == 4:
                     dic['intersection type'] = intersection_type.roundabout
-                elif int_type == 'FIVE-POINT/ OR MORE':
+                elif int_type == 5:
                     dic['intersection type'] = intersection_type.multi_leg_intersection
+                elif int_type == 6:
+                    dic['intersection type'] = intersection_type.on_ramp
+                elif int_type == 7:
+                    dic['intersection type'] = intersection_type.off_ramp
+                elif int_type == 8:
+                    dic['intersection type'] = intersection_type.crossover
+                elif int_type == 9:
+                    dic['intersection type'] = intersection_type.railroad_crossing
+                elif int_type == 10 or int_type == 99:
+                    dic['intersection type'] = intersection_type.unknown
                 else:
                     print(int_type)
 
-                cond = row['rdcondition']
-                if cond == 'DRY':
-                    dic['weather'] = weather.clear
-                elif cond == 'CLOUDY':
-                    dic['weather'] = weather.cloudy
-                elif cond == 'RAIN':
-                    dic['weather'] = weather.rain
-                elif cond == 'WET' or cond == 'SLUSH' or cond == 'WATER (STANDING/ MOVING)':
-                    dic['weather'] = weather.wet
-                elif cond == 'FOG/ SMOG/ SMOKE':
-                    dic['weather'] = weather.smog
-                elif cond == 'SNOW':
-                    dic['weather'] = weather.snow
-                elif cond == 'ICE':
-                    dic['weather'] = weather.ice
-                elif cond == 'SLEED/ HAIL':
-                    dic['weather'] = weather.sleet
-                elif cond == '' or cond == 'UNKNOWN' or cond == 'OTHER *' or cond == 'SAND/ MUD/ DIRT/ GRAVEL':
-                    dic['weather'] = weather.unknown
+                if row['WEATHER'] != '':
+                    cond = int(row['WEATHER'])
+                    if cond >= 8:
+                        dic['weather'] = weather.unknown
+                    else:
+                        dic['weather'] = cond
+
+                dic['collision type'] = row['COLLISION_TYPE']
+                dic['street name'] = row['STREET_NAME']
+
+                o = row['ROAD_OWNER']
+                if o == '1' or o == '5' or o == '6':
+                    dic['road type'] = road_type.interstate
+                elif o == '2':
+                    dic['road type'] = road_type.state_route
+                elif o == '3':
+                    dic['road type'] = road_type.county_route
+                elif o == '4':
+                    dic['road type'] = road_type.local_street
+                elif o == '7':
+                    dic['road type'] = road_type.private
                 else:
-                    print(cond)
+                    dic['road type'] = road_type.unknown
 
                 wr.writerow(dic)
 
