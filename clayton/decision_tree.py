@@ -19,7 +19,7 @@ def intval(str):
 def all_labels_with_probs(vector, attr):
     vector.sort(key=lambda x: intval(x[attr]))
     groups = itertools.groupby(vector, key=operator.itemgetter(attr))
-    group = discreet_distribution()
+    group = discreet_distribution(name=attr)
     for g in groups:
         l = []
         for item in g[1]:
@@ -133,14 +133,14 @@ class decision_tree:
                 max_gainratio = gainratio
                 best_attrloc = i
 
-        n.cluster_labels = all_labels_with_probs(subset, self.cluster_loc)
+        n.cluster_labels = all_labels_with_probs(subset, at[best_attrloc])
         splits = split(subset, at[best_attrloc])
         n.val = at[best_attrloc]
         newattrs = attrlist.copy()
         newattrs.remove(at[best_attrloc])
         for sub in splits:
             n.children.append((self._create_tree(n, splits[sub], newattrs), sub))
-            print(sub)
+            # print(sub)
         return n
 
     def classify(self, datapt):
@@ -151,7 +151,8 @@ class decision_tree:
         print(str(node.val) + ' ' + str(node.cluster_labels))
         if node.val is None:
             return node
-        return self._get_node(datapt, node[datapt[self.cluster_loc]])
+        print(datapt[node.val])
+        return self._get_node(datapt, node[datapt[node.val]])
 
     def __repr__(self):
         return self._rep(self._root)
@@ -233,7 +234,7 @@ if __name__ == '__main__':
         count = 0
         tester = None
         for f in c:
-            if tester is None:
+            if count == 1:
                 tester = f
             if f['severity'] == '-1':
                 continue
@@ -241,10 +242,12 @@ if __name__ == '__main__':
             for k, val in f.items():
                 v[-1][k] = val
             count += 1
-            if count == 100:
+            if count == -1:
                 break
+        # print(list(x['speed limit'] for x in v))
 
         l = list(c.fieldnames)
+        print(all_labels_with_probs(v, attr='severity'))
         l.remove('severity')
         l.remove('street name')
         l.remove('injuries')
@@ -252,11 +255,12 @@ if __name__ == '__main__':
         l.remove('time')
         l.remove('lat')
         l.remove('lon')
+        l.remove('day')
         l.remove('month')
         l.remove('year')
-        l.remove('collision type')
-        tree = decision_tree(v, cluster_location='severity', attrlist=l, min_leaf_size=1)
-        print(tree)
+        # l.remove('collision type')
+        tree = decision_tree(v, cluster_location='severity', attrlist=l, min_leaf_size=1000)
+        # print(tree)
         print(tester)
         print('clas', tree.classify(tester))
 

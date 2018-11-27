@@ -8,7 +8,8 @@ class _pt:
 
 class discreet_distribution:
 
-    def __init__(self):
+    def __init__(self, name=None):
+        self.name = name
         self._dict = []
         self._size = 0
 
@@ -18,7 +19,7 @@ class discreet_distribution:
             if i[0] == item:
                 i[1] += occurences
                 return
-        self._dict.append((item, occurences))
+        self._dict.append([item, occurences])
         self._dict.sort(key=lambda i: -i[1])
 
     def probability(self, item):
@@ -38,6 +39,8 @@ class discreet_distribution:
 
     def __repr__(self):
         ret = ''
+        if self.name is not None:
+            ret += str(self.name) + ' '
         for pt in self.pts():
-            ret += '({}:{:.2f}) '.format(pt.label, pt.probability)
-        return ret
+            ret += '({}: {:.2f}) '.format(pt.label, 100 * pt.probability)
+        return ret + str(len(self))
