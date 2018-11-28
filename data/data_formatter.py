@@ -263,7 +263,7 @@ if __name__ == '__main__':
                 o = row['ILLUMINATION']
                 try:
                     o = int(o) - 1
-                    if o >= 8:
+                    if o >= 7:
                         o = illumination.unknown
                 except ValueError:
                     pass
