@@ -90,10 +90,11 @@ def gain_ratio(vectors, split_attribute, cluster):
     return ig / si
 
 
-def bootstrap_sample(vectors, size):
+def bootstrap_sample(vector_groups, size):
     ret = []
     for x in range(0, size):
-        ret.append(vectors[random.randint(0, len(vectors) - 1)])
+        consider = vector_groups[str(x % len(vector_groups))]
+        ret.append(consider[random.randint(0, len(consider) - 1)])
     return ret
 
 
@@ -217,8 +218,10 @@ class random_forest:
             self.n = n
         self.m = m
         self.trees = []
+        vector_groups = split(vectors, cluster_location)
+
         for x in range(0, T):
-            sample = bootstrap_sample(vectors, n)
+            sample = bootstrap_sample(vector_groups, n)
             self.trees.append(decision_tree(sample, cluster_location=cluster_location, attrlist=attrlist,
                                             min_leaf_size=min_leaf_size, m=m))
 
@@ -271,7 +274,8 @@ if __name__ == '__main__':
         # print(list(x['speed limit'] for x in v))
 
         l = list(c.fieldnames)
-        print(all_labels_with_probs(v, attr='severity'))
+        normalizer = all_labels_with_probs(v, attr='severity')
+        print(normalizer)
         l.remove('severity')
         l.remove('street name')
         l.remove('injuries')
@@ -283,25 +287,33 @@ if __name__ == '__main__':
         l.remove('month')
         l.remove('year')
         # l.remove('collision type')
-        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=1000, T=60, n=10000, m=int(len(l) / 2))
+        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=10, T=1, n=4000, m=int(len(l) / 3))
         # tree = decision_tree(v, cluster_location='severity', attrlist=l, min_leaf_size=1000)
         # print(tree)
+        print(tree.trees[0])
         print(v[70:72])
         print('clas', tree.classify(v[70]))
         print('clas2', tree.classify(v[71]))
         count = 0
         tot = 0
+        distr = {'0': [0, 0], '1': [0, 0], '2': [0, 0], '3': [0, 0], '4': [0, 0]}
         for pt in v:
-            if pt['severity'] != '0':
-                tot += 1
-                dic = tree.classify(pt)
-                m = -1
-                max = -1
-                for k in dic.keys():
-                    if dic[k] > max:
-                        max = dic[k]
-                        m = k
-                if m == pt['severity']:
-                    count += 1
-        print('accuracy:', count / len(v))
+            tot += 1
+            dic = tree.classify(pt)
+            m = -1
+            max = -1
+            for k in dic.keys():
+                if dic[k] > max:
+                    max = dic[k]
+                    m = k
+            # print(m, pt['severity'])
+            distr[m][1] += 1
+            if m == pt['severity']:
+                distr[m][0] += 1
+        for k in distr:
+            if distr[k][1] == 0:
+                print(k, 0)
+            else:
+                print(k, distr[k][0] / distr[k][1])
+
 

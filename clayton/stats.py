@@ -22,10 +22,14 @@ class discreet_distribution:
         self._dict.append([item, occurences])
         self._dict.sort(key=lambda i: -i[1])
 
+    def __getitem__(self, item):
+        return self.probability(item)
+
     def probability(self, item):
         for i in self._dict:
             if i[0] == item:
                 return i[1] / len(self)
+        raise IndexError('no such index ' + str(item) + ' in distribution')
 
     def most_likely(self):
         return _pt(self._dict[0][0], self._dict[0][1] / len(self))
