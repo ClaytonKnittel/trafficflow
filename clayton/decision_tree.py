@@ -93,7 +93,7 @@ def gain_ratio(vectors, split_attribute, cluster):
 def bootstrap_sample(vectors, size):
     ret = []
     for x in range(0, size):
-        ret.append(vectors[random.randint(0, len(vectors))])
+        ret.append(vectors[random.randint(0, len(vectors) - 1)])
     return ret
 
 
@@ -155,13 +155,17 @@ class decision_tree:
 
     def classify(self, datapt):
         n = self._get_node(datapt, self._root)
+        if n is None:
+            return discreet_distribution()
         return n.cluster_labels
 
     def _get_node(self, datapt, node):
-        print(str(node.val) + ' ' + str(node.cluster_labels))
+        # print(str(node))
+        if node is None:
+            return node
         if node.val is None:
             return node
-        print(datapt[node.val])
+        # print(datapt[node.val])
         return self._get_node(datapt, node[datapt[node.val]])
 
     def __repr__(self):
@@ -170,7 +174,7 @@ class decision_tree:
     def _rep(self, node, depth=0, split_by=None):
         ret = '-' * depth
         if split_by is not None:
-            ret += '(' + split_by + ')' + ' '
+            ret += '(' + split_by + ') '
         ret += str(node) + '\n'
         for c in node.children:
             ret += self._rep(c[0], depth+1, split_by=str(c[1]))
@@ -196,18 +200,21 @@ class decision_tree:
 
         def __repr__(self):
             if self.val is not None:
-                return str(self.val) + ' ' + str(self.cluster_labels)
+                return str(self.cluster_labels)
             else:
                 return 'l ' + str(self.cluster_labels)
 
 
 class random_forest:
 
-    def __init__(self, vectors, cluster_location=None, attrlist=None, min_leaf_size=1, T=1, n=1, m=-1):
+    def __init__(self, vectors, cluster_location=None, attrlist=None, min_leaf_size=1, T=1, n=-1, m=-1):
         # T is total number of trees
         # n is the size of the bagged clusters (number of data pts per bag)
         # m is number of attributes to choose from attrlist for each split
-        self.n = n
+        if n == -1:
+            self.n = len(vectors) / 3
+        else:
+            self.n = n
         self.m = m
         self.trees = []
         for x in range(0, T):
@@ -219,11 +226,13 @@ class random_forest:
         ret = {}
         for tree in self.trees:
             res = tree.classify(datapt)
-            for vp in res:
-                if vp[0] in ret:
-                    ret[vp[0]] += vp[1]
+            for vp in res.pts():
+                if vp.label in ret:
+                    ret[vp.label] += vp.probability
                 else:
-                    ret[vp[0]] = vp[1]
+                    ret[vp.label] = vp.probability
+        for i in ret.keys():
+            ret[i] /= len(self.trees)
         return ret
 
 
@@ -236,6 +245,14 @@ if __name__ == '__main__':
     #      [2, 'a', 'x'],
     #      [2, 'b', 'x'],
     #      [2, 'b', 'x']]
+    #
+    # r = random_forest(v, cluster_location=0, T=12, n=3, m=1)
+    #
+    # print(r.trees[0])
+    #
+    # print(r.classify({1: 'a', 2: 'y'}))
+    #
+    # exit(0)
 
     with open('/users/claytonknittel/pycharmprojects/trafficflow/data/allegheny.csv') as f:
         c = csv.DictReader(f, delimiter=',')
@@ -269,7 +286,8 @@ if __name__ == '__main__':
         l.remove('month')
         l.remove('year')
         # l.remove('collision type')
-        tree = decision_tree(v, cluster_location='severity', attrlist=l, min_leaf_size=1000)
+        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=1000, T=60, n=10000, m=int(len(l) / 3))
+        # tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=1000, T=10, n=50000, m=10)
         # print(tree)
         print(tester)
         print('clas', tree.classify(tester))
