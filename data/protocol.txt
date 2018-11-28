@@ -74,12 +74,22 @@ intersection type:
     unknown/unspecified = -1
 weather:
     clear = 0
-    rain = 2
-    sleet = 3
-    snow = 4
-    fog = 5
-    rain and fog = 6
-    sleet and fog = 7
+    rain = 1
+    sleet = 2
+    snow = 3
+    fog = 4
+    rain and fog = 5
+    sleet and fog = 6
+    unknown = -1
+road condition:
+    dry = 0
+    wet = 1
+    sand, mud, dirt, oil, or gravel = 2
+    snow = 3
+    slush = 4
+    ice = 5
+    ice patches = 6
+    water = 7
     unknown = -1
 collision type:
     no collision = 0

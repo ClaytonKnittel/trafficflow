@@ -44,11 +44,21 @@ def split(vectors, category):
 def entropy(vectors, cluster):
     # determines entropy of vectors split by the given cluster
     entr = 0
-    splits = split(vectors, cluster)
-    for sublist in splits:
-        p = len(splits[sublist]) / len(vectors)
+    map = {}
+    for v in vectors:
+        if v[cluster] in map:
+            map[v[cluster]] += 1
+        else:
+            map[v[cluster]] = 1
+    for k in map:
+        p = map[k] / len(vectors)
         if p != 0:
             entr -= p * np.log2(p)
+    # splits = split(vectors, cluster)
+    # for sublist in splits:
+    #     p = len(splits[sublist]) / len(vectors)
+    #     if p != 0:
+    #         entr -= p * np.log2(p)
     return entr
 
 

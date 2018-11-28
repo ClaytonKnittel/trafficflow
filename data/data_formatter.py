@@ -5,7 +5,7 @@ from map import geomap
 
 attrrow = ['severity', 'deaths', 'injuries', 'passengers', 'lat', 'lon', 'time', 'collision type', 'road type',
            'year', 'month', 'day', 'street name', 'speed limit', 'lane count', 'urban/rural', 'intersection type',
-           'weather']
+           'weather', 'road condition']
 
 
 class severity:
@@ -63,14 +63,25 @@ class intersection_type:
 
 class weather:
     clear = 0
-    rain = 2
-    sleet = 3
-    snow = 4
-    fog = 5
-    rain_and_fog = 6
-    sleet_and_fog = 7
+    rain = 1
+    sleet = 2
+    snow = 3
+    fog = 4
+    rain_and_fog = 5
+    sleet_and_fog = 6
     unknown = -1
 
+
+class road_condition:
+    dry = 0
+    wet = 1
+    sand_mud_dirt_oil_gravel = 2
+    snow = 3
+    slush = 4
+    ice = 5
+    ice_patches = 6
+    water = 7
+    unknown = -1
 
 
 def colon_sep_vals_to_csv(path):
@@ -113,8 +124,8 @@ def fill_in_street_names(csv_path, geomap, new_csv_path=None):
 
 
 if __name__ == '__main__':
-    g = geomap('/users/claytonknittel/downloads/Shape', '/users/claytonknittel/PycharmProjects/trafficflow/rtrees/north_carolina')
-    fill_in_street_names('/users/claytonknittel/downloads/test.csv', g, '/users/claytonknittel/downloads/test2.csv')
+    # g = geomap('/users/claytonknittel/downloads/Shape', '/users/claytonknittel/PycharmProjects/trafficflow/rtrees/north_carolina')
+    # fill_in_street_names('/users/claytonknittel/downloads/test.csv', g, '/users/claytonknittel/downloads/test2.csv')
 
     with open('/users/claytonknittel/downloads/alleghenyAccidents.csv', 'r') as file:
         f = csv.DictReader(file, delimiter=',')
@@ -150,29 +161,8 @@ if __name__ == '__main__':
                 dic['lat'] = lat
                 dic['lon'] = lon
 
-                # rdtype = row['LOCATION_TYPE']
-                # if rdtype == '"PUBLIC VEHICULAR AREA"':
-                #     dic['road type'] = road_type.offroad
-                # elif rdtype == '"NC ROUTE"':
-                #     dic['road type'] = road_type.state_route
-                # elif rdtype == '"STATE SECONDARY ROUTE"':
-                #     dic['road type'] = road_type.state_route
-                # elif rdtype == '"US ROUTE"':
-                #     dic['road type'] = road_type.US_route
-                # elif rdtype == '"LOCAL STREET"':
-                #     dic['road type'] = road_type.local_street
-                # elif rdtype == '"INTERSTATE"':
-                #     dic['road type'] = road_type.interstate
-                # elif rdtype == '"PRIVATE ROAD,DRIVEWAY"':
-                #     dic['road type'] = road_type.private
-                # elif rdtype == '' or rdtype == '"OTHER *"':
-                #     pass
-                # else:
-                #     print(rdtype)
-
                 dic['year'] = row['CRASH_YEAR']
                 dic['month'] = row['CRASH_MONTH']
-                # dic['day'] = row['']
                 if row['TIME_OF_DAY'] == '9999' or len(row['TIME_OF_DAY']) < 3:
                     dic['time'] = -1
                 else:
@@ -235,6 +225,16 @@ if __name__ == '__main__':
                     dic['road type'] = road_type.private
                 else:
                     dic['road type'] = road_type.unknown
+
+                o = row['ROAD_CONDITION']
+                try:
+                    if int(o) > 8:
+                        o = '8'
+                except ValueError:
+                    pass
+                if o == '':
+                    o = road_condition.unknown
+                dic['road condition'] = o
 
                 wr.writerow(dic)
 
