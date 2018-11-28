@@ -259,10 +259,7 @@ if __name__ == '__main__':
 
         v = []
         count = 0
-        tester = None
         for f in c:
-            if count == 1:
-                tester = f
             if f['severity'] == '-1':
                 continue
             v.append({})
@@ -286,9 +283,25 @@ if __name__ == '__main__':
         l.remove('month')
         l.remove('year')
         # l.remove('collision type')
-        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=1000, T=60, n=10000, m=int(len(l) / 3))
-        # tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=1000, T=10, n=50000, m=10)
+        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=1000, T=60, n=10000, m=int(len(l) / 2))
+        # tree = decision_tree(v, cluster_location='severity', attrlist=l, min_leaf_size=1000)
         # print(tree)
-        print(tester)
-        print('clas', tree.classify(tester))
+        print(v[70:72])
+        print('clas', tree.classify(v[70]))
+        print('clas2', tree.classify(v[71]))
+        count = 0
+        tot = 0
+        for pt in v:
+            if pt['severity'] != '0':
+                tot += 1
+                dic = tree.classify(pt)
+                m = -1
+                max = -1
+                for k in dic.keys():
+                    if dic[k] > max:
+                        max = dic[k]
+                        m = k
+                if m == pt['severity']:
+                    count += 1
+        print('accuracy:', count / len(v))
 

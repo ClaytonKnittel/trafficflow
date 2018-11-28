@@ -5,7 +5,8 @@ from map import geomap
 
 attrrow = ['severity', 'deaths', 'injuries', 'passengers', 'lat', 'lon', 'time', 'collision type', 'road type',
            'year', 'month', 'day', 'street name', 'speed limit', 'lane count', 'urban/rural', 'intersection type',
-           'weather', 'road condition']
+           'weather', 'road condition', 'illumination', 'location', 'unbelted', 'driver 16', 'driver 17',
+           'driver 18', 'driver 19', 'driver 20', 'driver 50-64', 'driver 65-74', 'driver 75+']
 
 
 class severity:
@@ -81,6 +82,29 @@ class road_condition:
     ice = 5
     ice_patches = 6
     water = 7
+    unknown = -1
+
+
+class illumination:
+    daylight = 0
+    dark_no_street_lights = 1
+    dark_street_lights = 2
+    dusk = 3
+    dawn = 4
+    dark_unknown_road_lighting = 5
+    unknown = -1
+
+
+class location:
+    na = 0
+    underpass = 1
+    ramp = 2
+    bridge = 3
+    tunnel = 4
+    toll_booth = 5
+    crossover = 6
+    driveway_parkinglot = 7
+    ramp_and_bridge = 8
     unknown = -1
 
 
@@ -229,12 +253,44 @@ if __name__ == '__main__':
                 o = row['ROAD_CONDITION']
                 try:
                     if int(o) > 8:
-                        o = '8'
+                        o = road_condition.unknown
                 except ValueError:
                     pass
                 if o == '':
                     o = road_condition.unknown
                 dic['road condition'] = o
+
+                o = row['ILLUMINATION']
+                try:
+                    o = int(o) - 1
+                    if o >= 8:
+                        o = illumination.unknown
+                except ValueError:
+                    pass
+                if o == '':
+                    o = illumination.unknown
+                dic['illumination'] = o
+
+                o = row['LOCATION_TYPE']
+                try:
+                    o = int(o)
+                    if o > 8:
+                        o = location.unknown
+                except ValueError:
+                    pass
+                if o == '':
+                    o = location.unknown
+                dic['location'] = o
+
+                dic['unbelted'] = row['UNBELTED']
+                dic['driver 16'] = row['DRIVER_16YR']
+                dic['driver 17'] = row['DRIVER_17YR']
+                dic['driver 18'] = row['DRIVER_18YR']
+                dic['driver 19'] = row['DRIVER_19YR']
+                dic['driver 20'] = row['DRIVER_20YR']
+                dic['driver 50-64'] = row['DRIVER_50_64YR']
+                dic['driver 65-74'] = row['DRIVER_65_74YR']
+                dic['driver 75+'] = row['DRIVER_75PLUS']
 
                 wr.writerow(dic)
 
