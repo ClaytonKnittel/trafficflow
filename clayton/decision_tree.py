@@ -282,10 +282,10 @@ if __name__ == '__main__':
         for f in c:
             if f['severity'] == '-1':
                 continue
-            if f['severity'] == '1' or f['severity'] == '2' or f['severity'] == '3':
-                continue
-            if f['severity'] == '4':
-                f['severity'] = '1'
+            # if f['severity'] == '1' or f['severity'] == '2' or f['severity'] == '3':
+            #     continue
+            # if f['severity'] == '4':
+            #     f['severity'] = '1'
             v.append({})
             for k, val in f.items():
                 v[-1][k] = val
@@ -309,38 +309,44 @@ if __name__ == '__main__':
         l.remove('year')
         # l.remove('collision type')
 
-        for T in (1, 5, 20, 80, 160):
-            for n in (500, 2000, 10000):
-                tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=10, T=T, n=n, m=int(len(l) / 3))
+        # for T in (1, 5, 20, 80, 160):
+        #     for n in (500, 2000, 10000):
+        T = 320
+        n = 2000
+        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=10, T=T, n=n, m=int(len(l) / 3))
 
-                # print(v[70:72])
-                # print('clas', tree.classify(v[70], debug=True))
-                # print('clas2', tree.classify(v[71], debug=True))
-                distr = {'0': [0, 0], '1': [0, 0]}#, '2': [0, 0], '3': [0, 0], '4': [0, 0]}
-                distr2 = {'0': [0, 0], '1': [0, 0]}#, '2': [0, 0], '3': [0, 0], '4': [0, 0]}
-                counf = 0
-                for pt in tree.testing_data:
-                    counf += 1
-                    dic = tree.classify(pt)
-                    m = -1
-                    max = -1
-                    for k in dic.keys():
-                        if dic[k] > max:
-                            max = dic[k]
-                            m = k
-                    # print(m, pt['severity'])
-                    try:
-                        distr[pt['severity']][1] += 1
-                        if m == pt['severity']:
-                            distr[m][0] += 1
-                    except KeyError:
-                        print(counf, dic)
+        # print(v[70:72])
+        # print('clas', tree.classify(v[70], debug=True))
+        # print('clas2', tree.classify(v[71], debug=True))
+        distr = {'0': [0, 0], '1': [0, 0], '2': [0, 0], '3': [0, 0], '4': [0, 0]}
+        distr2 = {'0': [0, 0], '1': [0, 0], '2': [0, 0], '3': [0, 0], '4': [0, 0]}
+        counf = 0
+        for pt in tree.testing_data:
+            counf += 1
+            dic = tree.classify(pt)
+            m = -1
+            max = -1
+            for k in dic.keys():
+                if dic[k] > max:
+                    max = dic[k]
+                    m = k
+            # print(m, pt['severity'])
+            try:
+                distr[pt['severity']][1] += 1
+                if m == pt['severity']:
+                    distr[m][0] += 1
+            except KeyError:
+                print(counf, dic)
 
-                print('T=' + str(T) + '   n=' + str(n))
-                for k in distr:
-                    if distr[k][1] == 0:
-                        print(k, 0)
-                    else:
-                        print(k, distr[k][0] / distr[k][1])
+        print('T=' + str(T) + '   n=' + str(n))
+        for k in distr:
+            if distr[k][1] == 0:
+                print(k, 0)
+            else:
+                print(k, distr[k][0] / distr[k][1])
 
+        d = discreet_distribution()
+        for t in tree.trees:
+            d.add(t._root.val)
+        print(d)
 
