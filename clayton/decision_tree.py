@@ -151,6 +151,7 @@ class decision_tree:
         newattrs.remove(at[best_attrloc])
         for sub in splits:
             n.children.append((self._create_tree(n, splits[sub], newattrs), sub))
+            n.children[-1][0].parent = n
             # print(sub)
         return n
 
@@ -167,7 +168,8 @@ class decision_tree:
         if node.val is None:
             return node
         # print(datapt[node.val])
-        return self._get_node(datapt, node[datapt[node.val]])
+        newNode = node[datapt[node.val]]
+        return self._get_node(datapt, newNode)
 
     def __repr__(self):
         return self._rep(self._root)
@@ -220,22 +222,37 @@ class random_forest:
         self.trees = []
         vector_groups = split(vectors, cluster_location)
 
+        k = 8
+        self.testing_data = []
+        for i in range(0, len(vector_groups)):
+            vg = vector_groups[str(i)]
+            for v in vg[0:int(len(vg) / k)]:
+                self.testing_data.append(v)
+            vector_groups[str(i)] = vg[int(len(vg) / k):]
+
         for x in range(0, T):
             sample = bootstrap_sample(vector_groups, n)
             self.trees.append(decision_tree(sample, cluster_location=cluster_location, attrlist=attrlist,
                                             min_leaf_size=min_leaf_size, m=m))
 
-    def classify(self, datapt):
+    def classify(self, datapt, debug=False):
         ret = {}
+        count = 0
         for tree in self.trees:
             res = tree.classify(datapt)
-            for vp in res.pts():
-                if vp.label in ret:
-                    ret[vp.label] += vp.probability
-                else:
-                    ret[vp.label] = vp.probability
+            if debug:
+                print(res)
+            # for vp in res.pts():
+            vp = res.most_likely()
+            count += len(res) * vp.probability
+            if vp.label in ret:
+                ret[vp.label] += len(res) * vp.probability
+            else:
+                ret[vp.label] = len(res) * vp.probability
+        if count == 0:
+            return {'0': 0}
         for i in ret.keys():
-            ret[i] /= len(self.trees)
+            ret[i] /= count
         return ret
 
 
@@ -265,6 +282,10 @@ if __name__ == '__main__':
         for f in c:
             if f['severity'] == '-1':
                 continue
+            if f['severity'] == '1' or f['severity'] == '2' or f['severity'] == '3':
+                continue
+            if f['severity'] == '4':
+                f['severity'] = '1'
             v.append({})
             for k, val in f.items():
                 v[-1][k] = val
@@ -287,33 +308,39 @@ if __name__ == '__main__':
         l.remove('month')
         l.remove('year')
         # l.remove('collision type')
-        tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=10, T=1, n=4000, m=int(len(l) / 3))
-        # tree = decision_tree(v, cluster_location='severity', attrlist=l, min_leaf_size=1000)
-        # print(tree)
-        print(tree.trees[0])
-        print(v[70:72])
-        print('clas', tree.classify(v[70]))
-        print('clas2', tree.classify(v[71]))
-        count = 0
-        tot = 0
-        distr = {'0': [0, 0], '1': [0, 0], '2': [0, 0], '3': [0, 0], '4': [0, 0]}
-        for pt in v:
-            tot += 1
-            dic = tree.classify(pt)
-            m = -1
-            max = -1
-            for k in dic.keys():
-                if dic[k] > max:
-                    max = dic[k]
-                    m = k
-            # print(m, pt['severity'])
-            distr[m][1] += 1
-            if m == pt['severity']:
-                distr[m][0] += 1
-        for k in distr:
-            if distr[k][1] == 0:
-                print(k, 0)
-            else:
-                print(k, distr[k][0] / distr[k][1])
+
+        for T in (1, 5, 20, 80, 160):
+            for n in (500, 2000, 10000):
+                tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=10, T=T, n=n, m=int(len(l) / 3))
+
+                # print(v[70:72])
+                # print('clas', tree.classify(v[70], debug=True))
+                # print('clas2', tree.classify(v[71], debug=True))
+                distr = {'0': [0, 0], '1': [0, 0]}#, '2': [0, 0], '3': [0, 0], '4': [0, 0]}
+                distr2 = {'0': [0, 0], '1': [0, 0]}#, '2': [0, 0], '3': [0, 0], '4': [0, 0]}
+                counf = 0
+                for pt in tree.testing_data:
+                    counf += 1
+                    dic = tree.classify(pt)
+                    m = -1
+                    max = -1
+                    for k in dic.keys():
+                        if dic[k] > max:
+                            max = dic[k]
+                            m = k
+                    # print(m, pt['severity'])
+                    try:
+                        distr[pt['severity']][1] += 1
+                        if m == pt['severity']:
+                            distr[m][0] += 1
+                    except KeyError:
+                        print(counf, dic)
+
+                print('T=' + str(T) + '   n=' + str(n))
+                for k in distr:
+                    if distr[k][1] == 0:
+                        print(k, 0)
+                    else:
+                        print(k, distr[k][0] / distr[k][1])
 
 

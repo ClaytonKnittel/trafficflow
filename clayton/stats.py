@@ -2,8 +2,8 @@
 class _pt:
 
     def __init__(self, label, probability):
-        self.label = label
-        self.probability = probability
+        self.label = str(label)
+        self.probability = float(probability)
 
 
 class discreet_distribution:
@@ -32,6 +32,8 @@ class discreet_distribution:
         raise IndexError('no such index ' + str(item) + ' in distribution')
 
     def most_likely(self):
+        if len(self) == 0:
+            return _pt(0, 0)
         return _pt(self._dict[0][0], self._dict[0][1] / len(self))
 
     def pts(self):

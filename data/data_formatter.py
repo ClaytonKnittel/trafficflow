@@ -1,6 +1,5 @@
 import csv
 from datetime import datetime
-from map import geomap
 
 
 attrrow = ['severity', 'deaths', 'injuries', 'passengers', 'lat', 'lon', 'time', 'collision type', 'road type',
@@ -178,7 +177,14 @@ if __name__ == '__main__':
                 if passengers == '':
                     dic['passengers'] = 0
                 else:
-                    dic['passengers'] = passengers
+                    try:
+                        p = int(passengers)
+                        if p > 10:
+                            print(p)
+                            p = 99
+                    except ValueError:
+                        p = -1
+                    dic['passengers'] = p
 
                 lat = row['DEC_LAT']
                 lon = row['DEC_LONG']
@@ -196,7 +202,14 @@ if __name__ == '__main__':
                     dt = datetime.strptime(t, '%H%M')
                     dic['time'] = dt.hour * 60 + dt.minute
 
-                dic['lane count'] = row['LANE_COUNT']
+                lanecount = row['LANE_COUNT']
+                try:
+                    lanecount = int(lanecount)
+                    if lanecount > 14:
+                        lanecount = -1
+                    dic['lane count'] = lanecount
+                except ValueError:
+                    dic['lane count'] = -1
                 dic['speed limit'] = row['SPEED_LIMIT']
                 dic['urban/rural'] = row['URBAN_RURAL']
 
