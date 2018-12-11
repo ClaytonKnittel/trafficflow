@@ -282,10 +282,37 @@ if __name__ == '__main__':
         for f in c:
             if f['severity'] == '-1':
                 continue
-            # if f['severity'] == '1' or f['severity'] == '2' or f['severity'] == '3':
-            #     continue
-            # if f['severity'] == '4':
-            #     f['severity'] = '1'
+            if f['severity'] == '1' or f['severity'] == '2' or f['severity'] == '3':
+                continue
+            if f['severity'] == '4':
+                f['severity'] = '1'
+
+            if f['driver 16'] == '1':
+                f['driver age'] = '0'
+            elif f['driver 17'] == '1':
+                f['driver age'] = '1'
+            elif f['driver 18'] == '1':
+                f['driver age'] = '1'
+            elif f['driver 19'] == '1':
+                f['driver age'] = '2'
+            elif f['driver 20'] == '1':
+                f['driver age'] = '2'
+            elif f['driver 50-64'] == '1':
+                f['driver age'] = '3'
+            elif f['driver 65-74'] == '1':
+                f['driver age'] = '4'
+            elif f['driver 75+'] == '1':
+                f['driver age'] = '5'
+            else:
+                f['driver age'] = '-1'
+
+            if f['speed limit'] == '':
+                f['speed limit'] = '20'
+            # elif int(f['speed limit']) < 20:
+            #     f['speed limit'] = '20'
+            # if int(f['speed limit']) % 10 == 5:
+            #     f['speed limit'] = str(int(f['speed limit']) - 5)
+
             v.append({})
             for k, val in f.items():
                 v[-1][k] = val
@@ -309,9 +336,19 @@ if __name__ == '__main__':
         l.remove('year')
         # l.remove('collision type')
 
+        l.append('driver age')
+        l.remove('driver 16')
+        l.remove('driver 17')
+        l.remove('driver 18')
+        l.remove('driver 19')
+        l.remove('driver 20')
+        l.remove('driver 50-64')
+        l.remove('driver 65-74')
+        l.remove('driver 75+')
+
         # for T in (1, 5, 20, 80, 160):
         #     for n in (500, 2000, 10000):
-        T = 320
+        T = 2000
         n = 2000
         tree = random_forest(v, cluster_location='severity', attrlist=l, min_leaf_size=10, T=T, n=n, m=int(len(l) / 3))
 
@@ -338,7 +375,7 @@ if __name__ == '__main__':
             except KeyError:
                 print(counf, dic)
 
-        print('T=' + str(T) + '   n=' + str(n))
+        print('T={}   n={}'.format(T, n))
         for k in distr:
             if distr[k][1] == 0:
                 print(k, 0)
@@ -349,4 +386,3 @@ if __name__ == '__main__':
         for t in tree.trees:
             d.add(t._root.val)
         print(d)
-
